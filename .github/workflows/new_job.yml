@@ -5,6 +5,7 @@ on:
   - pull_request
 
 jobs:
+- job: Test
   build:
     runs-on: ubuntu-latest
     steps:
@@ -16,3 +17,20 @@ jobs:
         run: |
           make test
           make lint
+
+
+- job: Snyk test
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          cache: 'npm' # ускоряет повторные сборки
+      - run: npm ci
+      - run: npm test
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
